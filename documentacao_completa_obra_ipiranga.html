@@ -1,0 +1,284 @@
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">Documentação completa do sistema da obra: visão geral, regras de negócio, passos de implementação, como operar e lista de arquivos com botões de copiar</h2>
+
+<div role="tablist" style="display:flex;gap:2px;border-bottom:0.5px solid var(--border);margin-bottom:1rem;overflow-x:auto;">
+<button class="doc-tab doc-active" data-tab="geral" onclick="docShow('geral',this)" style="background:none;border:none;border-bottom:2px solid var(--text-accent);padding:10px 12px;font-size:13px;color:var(--text-primary);cursor:pointer;white-space:nowrap;">Visão geral</button>
+<button class="doc-tab" data-tab="regras" onclick="docShow('regras',this)" style="background:none;border:none;border-bottom:2px solid transparent;padding:10px 12px;font-size:13px;color:var(--text-secondary);cursor:pointer;white-space:nowrap;">Regras de negócio</button>
+<button class="doc-tab" data-tab="implementacao" onclick="docShow('implementacao',this)" style="background:none;border:none;border-bottom:2px solid transparent;padding:10px 12px;font-size:13px;color:var(--text-secondary);cursor:pointer;white-space:nowrap;">Implementação</button>
+<button class="doc-tab" data-tab="operacao" onclick="docShow('operacao',this)" style="background:none;border:none;border-bottom:2px solid transparent;padding:10px 12px;font-size:13px;color:var(--text-secondary);cursor:pointer;white-space:nowrap;">Operação</button>
+<button class="doc-tab" data-tab="arquivos" onclick="docShow('arquivos',this)" style="background:none;border:none;border-bottom:2px solid transparent;padding:10px 12px;font-size:13px;color:var(--text-secondary);cursor:pointer;white-space:nowrap;">Arquivos</button>
+</div>
+
+<div class="doc-panel" data-panel="geral">
+<h1 style="margin:0 0 4px;">Sistema de gestão financeira</h1>
+<p style="color:var(--text-secondary);font-size:14px;margin:0 0 1.5rem;">Obra Ipiranga 1 — documentação técnica e operacional</p>
+
+<h2 style="margin:0 0 8px;">Objetivo</h2>
+<p style="font-size:15px;line-height:1.7;margin:0 0 1.5rem;">Substituir o controle em planilha da obra por um sistema web próprio, mantendo as mesmas regras de rateio e categorização, com dashboards, captura automática de notas fiscais, alertas em tempo real e conciliação bancária.</p>
+
+<h2 style="margin:0 0 8px;">Stack</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:0 0 1.5rem;">
+<div style="background:var(--surface-1);border-radius:var(--radius);padding:12px;"><p style="font-size:12px;color:var(--text-secondary);margin:0 0 4px;">Backend</p><p style="font-size:14px;font-weight:500;margin:0;">Node.js + Express + TS</p></div>
+<div style="background:var(--surface-1);border-radius:var(--radius);padding:12px;"><p style="font-size:12px;color:var(--text-secondary);margin:0 0 4px;">ORM / Banco</p><p style="font-size:14px;font-weight:500;margin:0;">Prisma + PostgreSQL</p></div>
+<div style="background:var(--surface-1);border-radius:var(--radius);padding:12px;"><p style="font-size:12px;color:var(--text-secondary);margin:0 0 4px;">Filas</p><p style="font-size:14px;font-weight:500;margin:0;">Redis + BullMQ</p></div>
+<div style="background:var(--surface-1);border-radius:var(--radius);padding:12px;"><p style="font-size:12px;color:var(--text-secondary);margin:0 0 4px;">Frontend</p><p style="font-size:14px;font-weight:500;margin:0;">Next.js + Tailwind</p></div>
+<div style="background:var(--surface-1);border-radius:var(--radius);padding:12px;"><p style="font-size:12px;color:var(--text-secondary);margin:0 0 4px;">Integrações</p><p style="font-size:14px;font-weight:500;margin:0;">n8n (OCR e WhatsApp)</p></div>
+<div style="background:var(--surface-1);border-radius:var(--radius);padding:12px;"><p style="font-size:12px;color:var(--text-secondary);margin:0 0 4px;">Deploy</p><p style="font-size:14px;font-weight:500;margin:0;">Docker Compose + Traefik</p></div>
+</div>
+
+<h2 style="margin:0 0 8px;">Fases entregues</h2>
+<table style="width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed;">
+<tr style="border-bottom:0.5px solid var(--border);"><td style="padding:8px 8px 8px 0;font-weight:500;width:16%;">Fase 1</td><td style="padding:8px 0;color:var(--text-secondary);">Docker Compose, schema Prisma, seed do admin.</td></tr>
+<tr style="border-bottom:0.5px solid var(--border);"><td style="padding:8px 8px 8px 0;font-weight:500;">Fase 2</td><td style="padding:8px 0;color:var(--text-secondary);">Setup do Express, autenticação JWT, schemas Zod.</td></tr>
+<tr style="border-bottom:0.5px solid var(--border);"><td style="padding:8px 8px 8px 0;font-weight:500;">Fase 3</td><td style="padding:8px 0;color:var(--text-secondary);">CRUD de notas fiscais, aportes, sócios e categorias, com rateio por CPF.</td></tr>
+<tr style="border-bottom:0.5px solid var(--border);"><td style="padding:8px 8px 8px 0;font-weight:500;">Fase 4</td><td style="padding:8px 0;color:var(--text-secondary);">Webhooks WhatsApp/Sheets via n8n, conciliação bancária, exportação CSV.</td></tr>
+<tr><td style="padding:8px 8px 8px 0;font-weight:500;">Fase 5</td><td style="padding:8px 0;color:var(--text-secondary);">Frontend Next.js: login, 4 dashboards, tabela com filtros, cadastros.</td></tr>
+</table>
+</div>
+
+<div class="doc-panel" data-panel="regras" style="display:none;">
+<h2 style="margin:0 0 8px;">Rateio de despesas</h2>
+<ul style="margin:0 0 1.5rem;padding-left:20px;line-height:1.8;font-size:14px;">
+<li>O CPF do destinatário na NF-e é comparado aos sócios cadastrados.</li>
+<li>Bateu com um sócio: despesa 100% dele, status confirmada.</li>
+<li>Não bateu: nota fica pendente, sem sócio, para atribuição manual.</li>
+</ul>
+
+<h2 style="margin:0 0 8px;">Notas fiscais e categorização</h2>
+<ul style="margin:0 0 1.5rem;padding-left:20px;line-height:1.8;font-size:14px;">
+<li>Identificadas pela chave de acesso de 44 dígitos, sem duplicidade.</li>
+<li>Categoria automática por fornecedor; sem match, fica sem categoria até edição manual.</li>
+<li>Todo campo de toda entrada é editável e removível pela interface.</li>
+</ul>
+
+<h2 style="margin:0 0 8px;">Aportes e conciliação</h2>
+<ul style="margin:0 0 1.5rem;padding-left:20px;line-height:1.8;font-size:14px;">
+<li>Saldo em caixa = total aportado menos total gasto.</li>
+<li>Extrato bancário importado é comparado por valor exato e data, com tolerância de 3 dias.</li>
+<li>Sem correspondência, a transação fica pendente na lista de divergências.</li>
+</ul>
+
+<h2 style="margin:0 0 8px;">Acesso e alertas</h2>
+<ul style="margin:0;padding-left:20px;line-height:1.8;font-size:14px;">
+<li>Acesso fechado por login; papéis admin e sócio.</li>
+<li>Toda inserção nova (site, WhatsApp, OCR ou planilha) dispara um alerta via fila.</li>
+<li>Novo sócio cadastrado passa a ser reconhecido automaticamente no rateio por CPF.</li>
+</ul>
+</div>
+
+<div class="doc-panel" data-panel="implementacao" style="display:none;">
+<h2 style="margin:0 0 12px;">Passo a passo para colocar no ar</h2>
+<ol style="margin:0;padding-left:20px;line-height:2;font-size:14px;">
+<li>Rodar, em ordem, os scripts <code>setup-fase1.sh</code> a <code>setup-fase5.sh</code> na pasta do projeto.</li>
+<li>Copiar <code>.env.example</code> para <code>.env</code> e preencher com senhas, segredos JWT e credenciais reais.</li>
+<li>Dentro de <code>api/</code>: <code>npm install</code>, depois <code>npm run prisma:generate</code> e <code>npx prisma migrate dev --name init</code>.</li>
+<li>Rodar <code>npm run prisma:seed</code> para criar o usuário administrador inicial.</li>
+<li>Dentro de <code>web/</code>: <code>npm install</code> e testar com <code>npm run dev</code> localmente antes do deploy.</li>
+<li>Configurar o fluxo no n8n com os webhooks de OCR e envio de WhatsApp, apontando para <code>N8N_WEBHOOK_URL</code>.</li>
+<li>Instalar o Apps Script na planilha Google Sheets e configurar o gatilho instalável de edição, apontando para <code>/webhooks/sheets</code>.</li>
+<li>No VPS: ajustar o nome da rede <code>traefik_proxy</code> no <code>docker-compose.yml</code> conforme o Traefik já existente, depois <code>docker compose up -d --build</code>.</li>
+<li>Confirmar DNS de <code>api.iastudio.shop</code> e <code>obra.iastudio.shop</code> apontando para o VPS.</li>
+<li>Fazer login pela primeira vez com o e-mail e senha definidos em <code>SEED_ADMIN_EMAIL</code>/<code>SEED_ADMIN_PASSWORD</code>.</li>
+</ol>
+</div>
+
+<div class="doc-panel" data-panel="operacao" style="display:none;">
+<h2 style="margin:0 0 8px;">Login</h2>
+<p style="font-size:14px;line-height:1.7;margin:0 0 1.5rem;">Acesse <code>obra.iastudio.shop</code>, entre com e-mail e senha. A sessão fica em um cookie válido por 7 dias.</p>
+
+<h2 style="margin:0 0 8px;">Dashboards</h2>
+<p style="font-size:14px;line-height:1.7;margin:0 0 1.5rem;">O menu lateral tem quatro visões: <strong style="font-weight:500;">por sócio</strong> (Elismar e Miquelangelo lado a lado), <strong style="font-weight:500;">visão geral</strong> (orçado x realizado x saldo), <strong style="font-weight:500;">por categoria</strong> e <strong style="font-weight:500;">por período</strong> (gráfico mensal de gastos e aportes).</p>
+
+<h2 style="margin:0 0 8px;">Tabela de dados</h2>
+<p style="font-size:14px;line-height:1.7;margin:0 0 1.5rem;">Em "Tabela de dados", filtre por sócio, categoria ou status. Categoria e sócio de cada nota são editáveis direto na linha, sem precisar abrir outra tela.</p>
+
+<h2 style="margin:0 0 8px;">Cadastros</h2>
+<p style="font-size:14px;line-height:1.7;margin:0 0 1.5rem;">Em "Cadastros", adicione ou remova sócios e categorias. Um sócio novo já passa a ser reconhecido nas próximas notas pelo CPF.</p>
+
+<h2 style="margin:0 0 8px;">Rotina semanal sugerida</h2>
+<p style="font-size:14px;line-height:1.7;margin:0;">Revisar as notas com status pendente na tabela de dados, conferir alertas recebidos no WhatsApp, e uma vez por mês importar o extrato bancário em "Conciliação" para revisar divergências.</p>
+</div>
+
+<div class="doc-panel" data-panel="arquivos" style="display:none;">
+<h2 style="margin:0 0 8px;">Árvore de diretórios</h2>
+<div style="position:relative;margin:0 0 1.5rem;">
+<button onclick="docCopy('arv-arquivos',this)" style="position:absolute;top:8px;right:8px;font-size:12px;padding:4px 10px;">Copiar</button>
+<pre id="arv-arquivos" style="background:var(--surface-1);border-radius:var(--radius);padding:14px;max-height:220px;overflow-y:auto;font-family:var(--font-mono);font-size:12px;line-height:1.6;margin:0;">obra-ipiranga/
+├── docker-compose.yml
+├── .env.example
+├── .gitignore
+├── api/
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   └── seed.ts
+│   └── src/
+│       ├── server.ts
+│       ├── worker.ts
+│       ├── config/env.ts
+│       ├── middlewares/
+│       │   ├── auth.ts
+│       │   ├── errorHandler.ts
+│       │   ├── validate.ts
+│       │   └── webhookAuth.ts
+│       ├── routes/
+│       │   ├── auth.routes.ts
+│       │   ├── categorias.routes.ts
+│       │   ├── participantes.routes.ts
+│       │   ├── aportes.routes.ts
+│       │   ├── notasFiscais.routes.ts
+│       │   ├── webhooks.routes.ts
+│       │   ├── conciliacao.routes.ts
+│       │   ├── exportacao.routes.ts
+│       │   └── dashboard.routes.ts
+│       ├── controllers/
+│       ├── services/
+│       ├── schemas/
+│       ├── lib/
+│       │   ├── prisma.ts
+│       │   ├── logger.ts
+│       │   ├── queue.ts
+│       │   ├── errors.ts
+│       │   ├── pagination.ts
+│       │   └── n8n.ts
+│       └── jobs/
+└── web/
+    ├── Dockerfile
+    ├── package.json
+    ├── tailwind.config.ts
+    ├── next.config.js
+    └── src/
+        ├── middleware.ts
+        ├── lib/api.ts
+        ├── components/
+        │   ├── Sidebar.tsx
+        │   ├── Topbar.tsx
+        │   └── MetricCard.tsx
+        └── app/
+            ├── login/page.tsx
+            ├── dashboard/
+            │   ├── geral/page.tsx
+            │   ├── por-socio/page.tsx
+            │   ├── por-categoria/page.tsx
+            │   └── por-periodo/page.tsx
+            ├── dados/page.tsx
+            └── cadastros/page.tsx</pre>
+</div>
+
+<h2 style="margin:0 0 8px;">docker-compose.yml</h2>
+<div style="position:relative;margin:0 0 1.5rem;">
+<button onclick="docCopy('arq-compose',this)" style="position:absolute;top:8px;right:8px;font-size:12px;padding:4px 10px;">Copiar</button>
+<pre id="arq-compose" style="background:var(--surface-1);border-radius:var(--radius);padding:14px;max-height:220px;overflow-y:auto;font-family:var(--font-mono);font-size:12px;line-height:1.6;margin:0;">services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [internal]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes: [redis_data:/data]
+    networks: [internal]
+
+  api:
+    build: ./api
+    restart: unless-stopped
+    command: ["node", "dist/server.js"]
+    depends_on: [postgres, redis]
+    env_file: .env
+    networks: [internal, traefik_proxy]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.obra-api.rule=Host(`api.iastudio.shop`)
+      - traefik.http.routers.obra-api.entrypoints=websecure
+      - traefik.http.routers.obra-api.tls.certresolver=letsencrypt
+      - traefik.http.services.obra-api.loadbalancer.server.port=3000
+
+  worker:
+    build: ./api
+    restart: unless-stopped
+    command: ["node", "dist/worker.js"]
+    depends_on: [postgres, redis]
+    env_file: .env
+    networks: [internal]
+
+  web:
+    build: ./web
+    restart: unless-stopped
+    depends_on: [api]
+    env_file: .env
+    networks: [internal, traefik_proxy]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.obra-web.rule=Host(`obra.iastudio.shop`)
+      - traefik.http.routers.obra-web.entrypoints=websecure
+      - traefik.http.routers.obra-web.tls.certresolver=letsencrypt
+      - traefik.http.services.obra-web.loadbalancer.server.port=3000
+
+networks:
+  internal:
+  traefik_proxy:
+    external: true
+
+volumes:
+  postgres_data:
+  redis_data:</pre>
+</div>
+
+<h2 style="margin:0 0 8px;">.env.example</h2>
+<div style="position:relative;margin:0 0 1.5rem;">
+<button onclick="docCopy('arq-env',this)" style="position:absolute;top:8px;right:8px;font-size:12px;padding:4px 10px;">Copiar</button>
+<pre id="arq-env" style="background:var(--surface-1);border-radius:var(--radius);padding:14px;max-height:220px;overflow-y:auto;font-family:var(--font-mono);font-size:12px;line-height:1.6;margin:0;">POSTGRES_USER=obra_admin
+POSTGRES_PASSWORD=troque_essa_senha
+POSTGRES_DB=obra_ipiranga
+DATABASE_URL=postgresql://obra_admin:troque_essa_senha@postgres:5432/obra_ipiranga
+
+REDIS_URL=redis://redis:6379
+
+JWT_SECRET=gere_com_openssl_rand_hex_32
+JWT_EXPIRES_IN=7d
+
+SEED_ADMIN_NAME=Elismar Oliveira Guimarães
+SEED_ADMIN_EMAIL=admin@iastudio.shop
+SEED_ADMIN_PASSWORD=defina_uma_senha_forte
+
+N8N_WEBHOOK_URL=https://seu-n8n.exemplo.com/webhook/obra
+N8N_WEBHOOK_SECRET=gere_outro_segredo
+SHEETS_WEBHOOK_SECRET=gere_outro_segredo
+
+NEXT_PUBLIC_API_URL=https://api.iastudio.shop</pre>
+</div>
+
+<h2 style="margin:0 0 8px;">Código completo de cada arquivo</h2>
+<p style="font-size:14px;line-height:1.7;margin:0;">O conteúdo integral de todas as rotas, serviços, controllers e telas está nas mensagens anteriores desta conversa, organizadas por fase (1 a 5). Esta página reúne os arquivos de configuração centrais para referência rápida; para o código-fonte completo, use os scripts <code>setup-fase1.sh</code> a <code>setup-fase5.sh</code> já entregues.</p>
+</div>
+
+<script>
+function docShow(nome, botao) {
+  document.querySelectorAll('.doc-panel').forEach(function(p) {
+    p.style.display = p.getAttribute('data-panel') === nome ? 'block' : 'none';
+  });
+  document.querySelectorAll('.doc-tab').forEach(function(t) {
+    t.style.borderBottomColor = 'transparent';
+    t.style.color = 'var(--text-secondary)';
+  });
+  botao.style.borderBottomColor = 'var(--text-accent)';
+  botao.style.color = 'var(--text-primary)';
+}
+
+function docCopy(id, botao) {
+  var texto = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(texto).then(function() {
+    var original = botao.textContent;
+    botao.textContent = 'Copiado';
+    setTimeout(function() { botao.textContent = original; }, 1500);
+  });
+}
+</script>

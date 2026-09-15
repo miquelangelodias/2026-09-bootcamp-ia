@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumo Executivo - Sistema de Gestão Obra Ipiranga 1</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --border: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); line-height: 1.6; padding: 2rem; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); overflow: hidden; }
+        header { background: var(--primary); color: white; padding: 2rem; text-align: center; }
+        header h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        
+        /* Tabs System */
+        .tabs { display: flex; border-bottom: 1px solid var(--border); background: #f1f5f9; }
+        .tab-btn { flex: 1; padding: 1rem; border: none; background: none; font-size: 1rem; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s; }
+        .tab-btn:hover { color: var(--primary); background: #e2e8f0; }
+        .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); background: white; }
+        
+        .tab-content { display: none; padding: 2rem; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-in; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        h2 { color: var(--primary-dark); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+        h3 { margin: 1.5rem 0 0.5rem; color: #334155; }
+        ul, ol { margin-left: 1.5rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.5rem; }
+        code { background: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.9em; color: #b91c1c; }
+        pre { background: #1e293b; color: #f8fafc; padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
+        .card { border: 1px solid var(--border); padding: 1.5rem; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Obra Ipiranga 1 - Arquitetura & Gestão</h1>
+        <p>Resumo Executivo do Sistema Web</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab(event, 'funcionalidades')">Funcionalidades & Regras</button>
+        <button class="tab-btn" onclick="openTab(event, 'arquitetura')">Arquitetura & Stack</button>
+        <button class="tab-btn" onclick="openTab(event, 'deploy')">Guia de Deploy (VPS)</button>
+    </div>
+
+    <!-- TAB 1: Funcionalidades -->
+    <div id="funcionalidades" class="tab-content active">
+        <h2>Regras de Negócio e Funcionalidades Core</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Rateio Automático por CPF</h3>
+                <p>O core financeiro avalia o <code>cpf_destinatario</code> de toda Nota Fiscal inserida. Se corresponder a um sócio cadastrado, a despesa é integralmente atribuída a ele. Notas sem CPF de sócio entram no funil <strong>Pendente de Revisão</strong> para atribuição manual no Dashboard.</p>
+            </div>
+            <div class="card">
+                <h3>Conciliação Bancária</h3>
+                <p>Módulo preparado para processamento de extratos. Transações são cruzadas com <em>Aportes</em> e <em>Notas Fiscais</em> usando match de Valor + Data (tolerância de 3 dias configurada). Registros órfãos ficam aguardando pareamento humano.</p>
+            </div>
+            <div class="card">
+                <h3>Workers Assíncronos & OCR</h3>
+                <p>Operações pesadas não bloqueiam a interface. O upload de notas via WhatsApp ou Web é enviado para uma fila Redis/BullMQ. O processamento (leitura de QR Code ou envio ao webhook do n8n para OCR) roda em background, devolvendo o resultado via API de webhooks e emitindo Alertas.</p>
+            </div>
+            <div class="card">
+                <h3>Dashboard de Sócios (Lado a Lado)</h3>
+                <p>Visão gerencial desenhada para dupla de sócios: acompanhamento simétrico de Aportes vs. Despesas Alocadas, gerando o saldo devedor ou credor de cada um em tempo real em relação ao orçamento global (<code>valor_orcado</code>).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: Arquitetura -->
+    <div id="arquitetura" class="tab-content">
+        <h2>Stack Tecnológica</h2>
+        <ul>
+            <li><strong>Frontend:</strong> Next.js (App Router), React 18, Tailwind CSS. Build standalone Dockerizado para otimização de imagem.</li>
+            <li><strong>Backend (API & Worker):</strong> Node.js, Express, TypeScript. Dividido em dois entrypoints lógicos (Server HTTP e Consumidor BullMQ) usando a mesma base de código.</li>
+            <li><strong>Banco de Dados:</strong> PostgreSQL gerenciado através do Prisma ORM (Tipagem estática e migrações seguras).</li>
+            <li><strong>Mensageria:</strong> Redis operando como broker em memória para as filas de jobs gerenciadas pelo BullMQ.</li>
+            <li><strong>Infra/Routing:</strong> Docker Compose orquestrando as redes. O proxy Traefik (pré-existente na sua VPS de laboratório) resolve os certificados Let's Encrypt e direciona as requisições para os containers.</li>
+        </ul>
+
+        <h3>Modelo de Segurança</h3>
+        <p>A autenticação emprega <strong>JWT transmitido via cookies httpOnly</strong>. Esse padrão impede que scripts maliciosos injetados no navegador (XSS) roubem a credencial de sessão.</p>
+    </div>
+
+    <!-- TAB 3: Deploy -->
+    <div id="deploy" class="tab-content">
+        <h2>Guia de Implantação na VPS Ubuntu</h2>
+        <p>Com a stack configurada, estes são os passos de subida no seu ambiente Docker hosteado:</p>
+        
+        <ol>
+            <li><strong>Transferência e Preparação:</strong> Suba o repositório na sua instância.</li>
+            <li><strong>Configuração do Environment:</strong> 
+<pre><code>cp .env.example .env
+nano .env # Ajuste as senhas (POSTGRES_PASSWORD, JWT_SECRET, CREDENCIAIS ADMIN)</code></pre>
+            </li>
+            <li><strong>Build e Subida dos Serviços:</strong>
+<pre><code>docker compose build
+docker compose up -d</code></pre>
+            </li>
+            <li><strong>Migração de Banco e Seed Inicial:</strong> Rode os comandos abaixo de fora para instruir o container da API a formatar o Postgres e gerar o Admin:
+<pre><code>docker exec -it obra_api npm run prisma:migrate
+docker exec -it obra_api npm run seed</code></pre>
+            </li>
+            <li><strong>Validação de Rotas Seguras:</strong> Confirme as rotas nos terminais web acessando <code>https://obra.iastudio.shop</code> (Frontend) e <code>https://api.iastudio.shop/health</code> (Status Backend).</li>
+        </ol>
+    </div>
+</div>
+
+<script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].classList.remove("active");
+        }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
+
+</body>
+</html>
