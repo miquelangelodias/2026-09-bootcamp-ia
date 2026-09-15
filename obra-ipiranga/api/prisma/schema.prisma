@@ -1,0 +1,110 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  SOCIO
+}
+
+model Participante {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  cpf       String   @unique
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notas     NotaFiscal[]
+  aportes   Aporte[]
+}
+
+model Categoria {
+  id        Int      @id @default(autoincrement())
+  nome      String   @unique
+  etapa     String?
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notas     NotaFiscal[]
+}
+
+model NotaFiscal {
+  id              Int           @id @default(autoincrement())
+  chaveAcesso     String?       @unique
+  numero          String?
+  dataEmissao     DateTime?
+  fornecedor      String?
+  valorTotal      Decimal       @db.Decimal(12, 2)
+  status          StatusNota    @default(PENDENTE)
+  participanteId  Int?
+  categoriaId     Int?
+  observacao      String?
+  origem          OrigemNota    @default(MANUAL)
+  sheetsRowId     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  participante    Participante? @relation(fields: [participanteId], references: [id])
+  categoria       Categoria?    @relation(fields: [categoriaId], references: [id])
+
+  @@index([participanteId])
+  @@index([status])
+  @@index([dataEmissao])
+}
+
+enum StatusNota {
+  PENDENTE
+  CONFIRMADA
+  CANCELADA
+}
+
+enum OrigemNota {
+  MANUAL
+  EVOLUTION
+  SHEETS
+  OCR
+}
+
+model Aporte {
+  id              Int           @id @default(autoincrement())
+  data            DateTime
+  valor           Decimal       @db.Decimal(12, 2)
+  participanteId  Int
+  observacao      String?
+  sheetsRowId     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  participante    Participante  @relation(fields: [participanteId], references: [id])
+
+  @@index([participanteId])
+  @@index([data])
+}
+
+model SyncLog {
+  id          Int      @id @default(autoincrement())
+  direction   String
+  entity      String
+  status      String
+  message     String?
+  payload     Json?
+  createdAt   DateTime @default(now())
+}
